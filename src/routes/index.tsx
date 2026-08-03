@@ -208,18 +208,27 @@ function Dashboard() {
           <div className="min-w-0">
             <p className="inline-flex items-center gap-2 text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
               <CalendarDays className="h-3.5 w-3.5" /> Today's schedule
+              {gradeQuery.data ? <span className="text-primary-glow">· {gradeQuery.data}</span> : null}
             </p>
             <h1 className="font-display mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">
               Your <span className="gradient-text">six periods</span>, all in one vault
             </h1>
           </div>
-          <Button
-            onClick={() => setTimerOpen((prev) => !prev)}
-            className="h-12 shrink-0 rounded-2xl bg-primary px-5 font-bold text-primary-foreground shadow-[var(--shadow-glow)] hover:bg-primary-glow"
-          >
-            <Timer className="h-4 w-4" />
-            {timerOpen ? "Hide study session" : "Start Study Session"}
-          </Button>
+          <div className="col-span-2 flex flex-wrap items-center gap-3 sm:col-span-1 sm:shrink-0">
+            <GradeSelect
+              value={gradeQuery.data ?? ""}
+              disabled={gradeQuery.isPending || setGrade.isPending}
+              onChange={(grade) => setGrade.mutate(grade)}
+            />
+            <Button
+              onClick={() => setTimerOpen((prev) => !prev)}
+              className="h-12 shrink-0 rounded-2xl bg-primary px-5 font-bold text-primary-foreground shadow-[var(--shadow-glow)] hover:bg-primary-glow"
+            >
+              <Timer className="h-4 w-4" />
+              {timerOpen ? "Hide study session" : "Start Study Session"}
+            </Button>
+          </div>
+
         </div>
 
         {timerOpen ? (
