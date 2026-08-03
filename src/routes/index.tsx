@@ -84,7 +84,44 @@ function Dashboard() {
     },
   });
 
+  const gradeQuery = useQuery({
+    queryKey: ["grade", session?.user.id],
+    enabled: Boolean(session),
+    queryFn: async (): Promise<string> => {
+      const { data, error } = await supabase
+        .from("student_profiles")
+        .select("grade")
+        .maybeSingle();
+      if (error) throw error;
+      if (data) return data.grade;
+      const { data: created, error: insertError } = await supabase
+        .from("student_profiles")
+        .insert({ user_id: session!.user.id })
+        .select("grade")
+        .single();
+      if (insertError) throw insertError;
+      return created.grade;
+    },
+  });
+
+  const setGrade = useMutation({
+    mutationFn: async (grade: string) => {
+      const { error } = await supabase
+        .from("student_profiles")
+        .upsert({ user_id: session!.user.id, grade }, { onConflict: "user_id" });
+      if (error) throw error;
+      return grade;
+    },
+    onSuccess: (grade) => {
+      queryClient.setQueryData(["grade", session?.user.id], grade);
+      toast.success(`Saved — ${grade}`);
+    },
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : "Could not save your grade"),
+  });
+
   const addLink = useMutation({
+
     mutationFn: async (input: {
       classId: string;
       title: string;
