@@ -33,7 +33,7 @@ export function GradeSelect({ value, onChange, disabled }: GradeSelectProps) {
           <SelectValue placeholder="Select grade" />
         </span>
       </SelectTrigger>
-      <SelectContent className="rounded-xl border-border bg-card shadow-2xl">
+      <SelectContent className="rounded-xl border-border bg-popover shadow-2xl">
         {GRADE_OPTIONS.map((option) => (
           <SelectItem key={option.value} value={option.value} className="rounded-lg">
             {option.label}
