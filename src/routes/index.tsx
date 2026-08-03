@@ -11,6 +11,7 @@ import { ClassCard } from "@/components/vault/ClassCard";
 import { PomodoroTimer } from "@/components/vault/PomodoroTimer";
 import { StudyBuddy } from "@/components/vault/StudyBuddy";
 import { TopNav } from "@/components/vault/TopNav";
+import { GradeSelect } from "@/components/vault/GradeSelect";
 import { Button } from "@/components/ui/button";
 import type { ClassRecord, LinkCategory } from "@/lib/vault";
 
