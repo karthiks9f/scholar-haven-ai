@@ -23,7 +23,7 @@ type GradeSelectProps = {
 
 export function GradeSelect({ value, onChange, disabled }: GradeSelectProps) {
   return (
-    <Select value={value} onValueChange={onChange} disabled={disabled}>
+    <Select value={value} onValueChange={onChange} disabled={disabled ?? false}>
       <SelectTrigger
         aria-label="Select grade level"
         className="h-11 w-full rounded-xl border-border bg-surface-raised px-3 font-semibold sm:w-[220px]"
