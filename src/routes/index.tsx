@@ -84,40 +84,47 @@ function Dashboard() {
     },
   });
 
-  const gradeQuery = useQuery({
-    queryKey: ["grade", session?.user.id],
+  type Profile = { grade: string; second_language: string };
+
+  const profileQuery = useQuery({
+    queryKey: ["profile", session?.user.id],
     enabled: Boolean(session),
-    queryFn: async (): Promise<string> => {
+    queryFn: async (): Promise<Profile> => {
       const { data, error } = await supabase
         .from("student_profiles")
-        .select("grade")
+        .select("grade, second_language")
         .maybeSingle();
       if (error) throw error;
-      if (data) return data.grade;
+      if (data) return data;
       const { data: created, error: insertError } = await supabase
         .from("student_profiles")
         .insert({ user_id: session!.user.id })
-        .select("grade")
+        .select("grade, second_language")
         .single();
       if (insertError) throw insertError;
-      return created.grade;
+      return created;
     },
   });
 
-  const setGrade = useMutation({
-    mutationFn: async (grade: string) => {
+  const setProfile = useMutation({
+    mutationFn: async (patch: Partial<Profile>) => {
+      const next: Profile = {
+        grade: profileQuery.data?.grade ?? "9th Grade",
+        second_language: profileQuery.data?.second_language ?? "Kannada",
+        ...patch,
+      };
       const { error } = await supabase
         .from("student_profiles")
-        .upsert({ user_id: session!.user.id, grade }, { onConflict: "user_id" });
+        .upsert({ user_id: session!.user.id, ...next }, { onConflict: "user_id" });
       if (error) throw error;
-      return grade;
+      return next;
     },
-    onSuccess: (grade) => {
-      queryClient.setQueryData(["grade", session?.user.id], grade);
-      toast.success(`Saved — ${grade}`);
+    onSuccess: (next) => {
+      queryClient.setQueryData(["profile", session?.user.id], next);
+      toast.success("Saved");
     },
     onError: (error) =>
-      toast.error(error instanceof Error ? error.message : "Could not save your grade"),
+      toast.error(error instanceof Error ? error.message : "Could not save your settings"),
   });
 
   const addLink = useMutation({
