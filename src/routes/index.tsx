@@ -271,7 +271,14 @@ function Dashboard() {
               {filtered.map((record) => (
                 <ClassCard
                   key={record.id}
-                  record={record}
+                  record={
+                    record.subject === "2nd Language" && profileQuery.data
+                      ? {
+                          ...record,
+                          subject: `2nd Language · ${profileQuery.data.second_language}`,
+                        }
+                      : record
+                  }
                   saving={addLink.isPending}
                   onAddLink={async (input) => {
                     await addLink.mutateAsync({ classId: record.id, ...input });
