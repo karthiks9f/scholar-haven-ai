@@ -12,6 +12,7 @@ import { PomodoroTimer } from "@/components/vault/PomodoroTimer";
 import { StudyBuddy } from "@/components/vault/StudyBuddy";
 import { TopNav } from "@/components/vault/TopNav";
 import { GradeSelect } from "@/components/vault/GradeSelect";
+import { LanguageSelect } from "@/components/vault/LanguageSelect";
 import { Button } from "@/components/ui/button";
 import type { ClassRecord, LinkCategory } from "@/lib/vault";
 
@@ -84,40 +85,47 @@ function Dashboard() {
     },
   });
 
-  const gradeQuery = useQuery({
-    queryKey: ["grade", session?.user.id],
+  type Profile = { grade: string; second_language: string };
+
+  const profileQuery = useQuery({
+    queryKey: ["profile", session?.user.id],
     enabled: Boolean(session),
-    queryFn: async (): Promise<string> => {
+    queryFn: async (): Promise<Profile> => {
       const { data, error } = await supabase
         .from("student_profiles")
-        .select("grade")
+        .select("grade, second_language")
         .maybeSingle();
       if (error) throw error;
-      if (data) return data.grade;
+      if (data) return data;
       const { data: created, error: insertError } = await supabase
         .from("student_profiles")
         .insert({ user_id: session!.user.id })
-        .select("grade")
+        .select("grade, second_language")
         .single();
       if (insertError) throw insertError;
-      return created.grade;
+      return created;
     },
   });
 
-  const setGrade = useMutation({
-    mutationFn: async (grade: string) => {
+  const setProfile = useMutation({
+    mutationFn: async (patch: Partial<Profile>) => {
+      const next: Profile = {
+        grade: profileQuery.data?.grade ?? "9th Grade",
+        second_language: profileQuery.data?.second_language ?? "Kannada",
+        ...patch,
+      };
       const { error } = await supabase
         .from("student_profiles")
-        .upsert({ user_id: session!.user.id, grade }, { onConflict: "user_id" });
+        .upsert({ user_id: session!.user.id, ...next }, { onConflict: "user_id" });
       if (error) throw error;
-      return grade;
+      return next;
     },
-    onSuccess: (grade) => {
-      queryClient.setQueryData(["grade", session?.user.id], grade);
-      toast.success(`Saved — ${grade}`);
+    onSuccess: (next) => {
+      queryClient.setQueryData(["profile", session?.user.id], next);
+      toast.success("Saved");
     },
     onError: (error) =>
-      toast.error(error instanceof Error ? error.message : "Could not save your grade"),
+      toast.error(error instanceof Error ? error.message : "Could not save your settings"),
   });
 
   const addLink = useMutation({
@@ -206,9 +214,13 @@ function Dashboard() {
       <main className="mx-auto max-w-7xl px-4 pt-8 pb-28 sm:px-6">
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 sm:flex sm:flex-wrap sm:justify-between">
           <div className="min-w-0">
-            <p className="inline-flex items-center gap-2 text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+            <p className="inline-flex flex-wrap items-center gap-2 text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
               <CalendarDays className="h-3.5 w-3.5" /> Today's schedule
-              {gradeQuery.data ? <span className="text-primary-glow">· {gradeQuery.data}</span> : null}
+              {profileQuery.data ? (
+                <span className="text-primary-glow">
+                  · {profileQuery.data.grade} · {profileQuery.data.second_language}
+                </span>
+              ) : null}
             </p>
             <h1 className="font-display mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">
               Your <span className="gradient-text">six periods</span>, all in one vault
@@ -216,9 +228,14 @@ function Dashboard() {
           </div>
           <div className="col-span-2 flex flex-wrap items-center gap-3 sm:col-span-1 sm:shrink-0">
             <GradeSelect
-              value={gradeQuery.data ?? ""}
-              disabled={gradeQuery.isPending || setGrade.isPending}
-              onChange={(grade) => setGrade.mutate(grade)}
+              value={profileQuery.data?.grade ?? ""}
+              disabled={profileQuery.isPending || setProfile.isPending}
+              onChange={(grade) => setProfile.mutate({ grade })}
+            />
+            <LanguageSelect
+              value={profileQuery.data?.second_language ?? ""}
+              disabled={profileQuery.isPending || setProfile.isPending}
+              onChange={(second_language) => setProfile.mutate({ second_language })}
             />
             <Button
               onClick={() => setTimerOpen((prev) => !prev)}
@@ -254,7 +271,14 @@ function Dashboard() {
               {filtered.map((record) => (
                 <ClassCard
                   key={record.id}
-                  record={record}
+                  record={
+                    record.subject === "2nd Language" && profileQuery.data
+                      ? {
+                          ...record,
+                          subject: `2nd Language · ${profileQuery.data.second_language}`,
+                        }
+                      : record
+                  }
                   saving={addLink.isPending}
                   onAddLink={async (input) => {
                     await addLink.mutateAsync({ classId: record.id, ...input });
