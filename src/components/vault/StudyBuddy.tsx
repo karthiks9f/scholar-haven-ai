@@ -145,7 +145,7 @@ export function StudyBuddy() {
                 <div className="min-w-0">
                   <p className="font-display truncate text-base font-extrabold">Study Buddy AI</p>
                   <p className="text-[11px] text-muted-foreground">
-                    {streaming ? "Thinking…" : "Knows your 6 class periods"}
+                    {streaming ? "Teaching…" : "Teaches your topics — no links"}
                   </p>
                 </div>
               </div>
@@ -191,7 +191,13 @@ export function StudyBuddy() {
                       </span>
                     ) : (
                       <div className="space-y-2 [&_a]:text-primary-glow [&_a]:underline [&_code]:rounded [&_code]:bg-secondary [&_code]:px-1 [&_li]:ml-4 [&_li]:list-disc [&_ol_li]:list-decimal [&_strong]:font-bold">
-                        <ReactMarkdown>{message.content}</ReactMarkdown>
+                        <ReactMarkdown
+                          components={{
+                            a: ({ children }) => <span>{children}</span>,
+                          }}
+                        >
+                          {message.content}
+                        </ReactMarkdown>
                       </div>
                     )}
                   </div>
