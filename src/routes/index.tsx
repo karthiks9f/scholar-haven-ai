@@ -9,28 +9,28 @@ import { supabase } from "@/integrations/supabase/client";
 import { AuthGate } from "@/components/vault/AuthGate";
 import { ClassCard } from "@/components/vault/ClassCard";
 import { PomodoroTimer } from "@/components/vault/PomodoroTimer";
-import { StudyBuddy } from "@/components/vault/StudyBuddy";
+import { StudyBuddy, type LessonRequest } from "@/components/vault/StudyBuddy";
 import { TopNav } from "@/components/vault/TopNav";
 import { GradeSelect } from "@/components/vault/GradeSelect";
 import { LanguageSelect } from "@/components/vault/LanguageSelect";
 import { Button } from "@/components/ui/button";
-import type { ClassRecord, LinkCategory } from "@/lib/vault";
+import type { ClassRecord } from "@/lib/vault";
 
 export const Route = createFileRoute("/")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "StudentVault — Class Links, Schedule & AI Study Buddy" },
+      { title: "StudentVault — In-App Lessons & Study Dashboard" },
       {
         name: "description",
         content:
-          "StudentVault keeps every class period, teacher contact and study link in one dark dashboard, with a Pomodoro timer and an AI Study Buddy.",
+          "StudentVault teaches high school subjects with in-app lessons, guided practice, a class schedule, focus timer and AI tutor.",
       },
-      { property: "og:title", content: "StudentVault — Your class resource dashboard" },
+      { property: "og:title", content: "StudentVault — Your in-app learning dashboard" },
       {
         property: "og:description",
         content:
-          "One dashboard for your six class periods, resource links, focus timer and AI Study Buddy.",
+          "Learn all six subjects through guided explanations and practice without leaving StudentVault.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -45,6 +45,7 @@ function Dashboard() {
   const [authReady, setAuthReady] = useState(false);
   const [query, setQuery] = useState("");
   const [timerOpen, setTimerOpen] = useState(false);
+  const [lessonRequest, setLessonRequest] = useState<LessonRequest | null>(null);
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
@@ -128,42 +129,6 @@ function Dashboard() {
       toast.error(error instanceof Error ? error.message : "Could not save your settings"),
   });
 
-  const addLink = useMutation({
-
-    mutationFn: async (input: {
-      classId: string;
-      title: string;
-      url: string;
-      category: LinkCategory;
-    }) => {
-      const { error } = await supabase.from("resource_links").insert({
-        class_id: input.classId,
-        title: input.title,
-        url: input.url,
-        category: input.category,
-        user_id: session!.user.id,
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Link added");
-      void queryClient.invalidateQueries({ queryKey: ["classes"] });
-    },
-    onError: (error) => toast.error(error instanceof Error ? error.message : "Could not add link"),
-  });
-
-  const removeLink = useMutation({
-    mutationFn: async (linkId: string) => {
-      const { error } = await supabase.from("resource_links").delete().eq("id", linkId);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Link removed");
-      void queryClient.invalidateQueries({ queryKey: ["classes"] });
-    },
-    onError: (error) => toast.error(error instanceof Error ? error.message : "Could not remove link"),
-  });
-
   const filtered = useMemo(() => {
     const records = classesQuery.data ?? [];
     const needle = query.trim().toLowerCase();
@@ -178,7 +143,7 @@ function Dashboard() {
           (link) =>
             link.title.toLowerCase().includes(needle) ||
             link.category.toLowerCase().includes(needle) ||
-            link.url.toLowerCase().includes(needle),
+              link.category.toLowerCase().includes(needle),
         );
         if (matchesClass) return record;
         if (links.length > 0) return { ...record, resource_links: links };
@@ -279,24 +244,31 @@ function Dashboard() {
                         }
                       : record
                   }
-                  saving={addLink.isPending}
-                  onAddLink={async (input) => {
-                    await addLink.mutateAsync({ classId: record.id, ...input });
+                  onTeach={(topic) => {
+                    setLessonRequest({
+                      id: crypto.randomUUID(),
+                      subject:
+                        record.subject === "2nd Language" && profileQuery.data
+                          ? `2nd Language · ${profileQuery.data.second_language}`
+                          : record.subject,
+                      topic,
+                      grade: profileQuery.data?.grade ?? "9th Grade",
+                      secondLanguage: profileQuery.data?.second_language ?? "Kannada",
+                    });
                   }}
-                  onRemoveLink={(linkId) => removeLink.mutate(linkId)}
                 />
               ))}
             </section>
             {filtered.length === 0 ? (
               <p className="mt-10 text-center text-sm text-muted-foreground">
-                Nothing matches “{query}”. Try another subject, teacher or link name.
+                Nothing matches “{query}”. Try another subject, teacher or lesson name.
               </p>
             ) : null}
           </>
         )}
       </main>
 
-      <StudyBuddy />
+      <StudyBuddy lessonRequest={lessonRequest} />
     </div>
   );
 }
