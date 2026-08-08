@@ -10,19 +10,19 @@ type Message = { id: string; role: "user" | "assistant"; content: string };
 
 const QUICK_PROMPTS = [
   {
-    label: "Summarize my notes",
+    label: "Teach me a topic",
     prompt:
-      "Summarize these AP European History notes into 5 key bullet points I can review before class: the causes of the French Revolution — financial crisis from war debt, the Estates General, bread prices, Enlightenment ideas, and the Tennis Court Oath.",
+      "Teach me quadratic equations from scratch for my Mathematics class — explain it, show a fully worked example step by step, then give me 2 practice questions with solutions at the end. Don't send me to any website.",
   },
   {
-    label: "Generate 3 quiz questions",
+    label: "Explain it simpler",
     prompt:
-      "Generate 3 study quiz questions (with answers hidden at the bottom) on cell division for my Biology class.",
+      "Explain photosynthesis for my Science class as if I'm hearing it for the first time — simple words, an analogy, and the full process step by step. Teach it here, no links.",
   },
   {
-    label: "Break down an essay",
+    label: "Quiz me & explain",
     prompt:
-      "Break down this English Literature assignment into steps with a mini schedule: a 1,200 word essay on whether Hamlet's madness is real or performed, due in 6 days.",
+      "Quiz me with 3 questions on my Social Science unit, then explain the correct answer for each one so I actually understand it.",
   },
 ];
 
@@ -31,20 +31,21 @@ const INITIAL_MESSAGES: Message[] = [
     id: "seed-1",
     role: "assistant",
     content:
-      "**Hey! I'm your Study Buddy ⚡**\n\nI can see your six class periods, so just tell me what you're working on. Try me with:\n\n- **Summarize** notes or a reading you paste in\n- **Quiz me** on a unit before a test\n- **Plan** an essay or project into daily steps",
+      "**Hey! I'm your Study Buddy ⚡**\n\nI don't hand out links — I teach you the topic right here. Tell me what you're stuck on and I'll:\n\n- **Explain** it from scratch in plain words\n- **Work through** an example step by step\n- **Quiz you** and explain every answer",
   },
   {
     id: "seed-2",
     role: "user",
-    content: "What should I focus on tonight? I have a Pre-Calc quiz Thursday.",
+    content: "Can you teach me how to find the slope of a line? I have a Maths test Thursday.",
   },
   {
     id: "seed-3",
     role: "assistant",
     content:
-      "**Tonight's plan (45 min)**\n\n- **15 min — Warm up:** redo the 6 trig identity problems you missed on the last worksheet.\n- **20 min — Core drill:** unit circle values for sin, cos and tan at every 30° and 45° step. Say them out loud, don't just read.\n- **10 min — Self-check:** write 3 problems that look like Thursday's quiz and solve them with no notes.\n\n**Tomorrow:** review only what you got wrong, then stop. Sleep beats cramming before a quiz.",
+      "**Slope = steepness of a line**\n\nIt answers: for every step right, how far do we go up or down?\n\n**The rule:** slope m = (y₂ − y₁) ÷ (x₂ − x₁) — \"rise over run\".\n\n**Worked example** — points (2, 3) and (6, 11):\n\n- Rise: 11 − 3 = **8**\n- Run: 6 − 2 = **4**\n- m = 8 ÷ 4 = **2** → the line climbs 2 units for every 1 unit right.\n\n**Watch out:** subtract the y's and x's in the *same* order, or you get the sign wrong.\n\n**Your turn:** find the slope through (1, 5) and (4, −1). Tell me your answer and I'll check your working.",
   },
 ];
+
 
 export function StudyBuddy() {
   const [open, setOpen] = useState(false);
@@ -144,7 +145,7 @@ export function StudyBuddy() {
                 <div className="min-w-0">
                   <p className="font-display truncate text-base font-extrabold">Study Buddy AI</p>
                   <p className="text-[11px] text-muted-foreground">
-                    {streaming ? "Thinking…" : "Knows your 6 class periods"}
+                    {streaming ? "Teaching…" : "Teaches your topics — no links"}
                   </p>
                 </div>
               </div>
@@ -190,7 +191,13 @@ export function StudyBuddy() {
                       </span>
                     ) : (
                       <div className="space-y-2 [&_a]:text-primary-glow [&_a]:underline [&_code]:rounded [&_code]:bg-secondary [&_code]:px-1 [&_li]:ml-4 [&_li]:list-disc [&_ol_li]:list-decimal [&_strong]:font-bold">
-                        <ReactMarkdown>{message.content}</ReactMarkdown>
+                        <ReactMarkdown
+                          components={{
+                            a: ({ children }) => <span>{children}</span>,
+                          }}
+                        >
+                          {message.content}
+                        </ReactMarkdown>
                       </div>
                     )}
                   </div>
