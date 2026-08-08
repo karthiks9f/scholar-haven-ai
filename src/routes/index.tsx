@@ -251,7 +251,7 @@ function Dashboard() {
                         record.subject === "2nd Language" && profileQuery.data
                           ? `2nd Language · ${profileQuery.data.second_language}`
                           : record.subject,
-                      topic,
+                      ...(topic ? { topic } : {}),
                       grade: profileQuery.data?.grade ?? "9th Grade",
                       secondLanguage: profileQuery.data?.second_language ?? "Kannada",
                     });
