@@ -8,6 +8,14 @@ import { cn } from "@/lib/utils";
 
 type Message = { id: string; role: "user" | "assistant"; content: string };
 
+export type LessonRequest = {
+  id: string;
+  subject: string;
+  topic?: string;
+  grade: string;
+  secondLanguage: string;
+};
+
 const QUICK_PROMPTS = [
   {
     label: "Teach me a topic",
@@ -47,13 +55,18 @@ const INITIAL_MESSAGES: Message[] = [
 ];
 
 
-export function StudyBuddy() {
+type StudyBuddyProps = {
+  lessonRequest?: LessonRequest | null;
+};
+
+export function StudyBuddy({ lessonRequest }: StudyBuddyProps) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const handledLessonRef = useRef<string | null>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -116,6 +129,19 @@ export function StudyBuddy() {
       setStreaming(false);
     }
   }
+
+  useEffect(() => {
+    if (!lessonRequest || handledLessonRef.current === lessonRequest.id) return;
+    handledLessonRef.current = lessonRequest.id;
+    setOpen(true);
+    const languageContext = lessonRequest.subject.startsWith("2nd Language")
+      ? ` The student's selected second language is ${lessonRequest.secondLanguage}.`
+      : "";
+    const topic = lessonRequest.topic ?? `an important ${lessonRequest.subject} topic suitable for this student`;
+    void send(
+      `Teach me ${topic} for ${lessonRequest.subject}. I am in ${lessonRequest.grade}.${languageContext} Start with a clear explanation, then a worked example, then ask me 3 practice questions one at a time. Keep the whole lesson inside StudentVault and do not provide links or send me to another website.`,
+    );
+  }, [lessonRequest]);
 
   return (
     <>
