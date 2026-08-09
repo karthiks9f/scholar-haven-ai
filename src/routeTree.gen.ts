@@ -10,11 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RevisionRouteImport } from './routes/revision'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as ApiRevisionRouteImport } from './routes/api/revision'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RevisionRoute = RevisionRouteImport.update({
+  id: '/revision',
+  path: '/revision',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
@@ -22,31 +29,44 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiRevisionRoute = ApiRevisionRouteImport.update({
+  id: '/api/revision',
+  path: '/api/revision',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/revision': typeof RevisionRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/revision': typeof ApiRevisionRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/revision': typeof RevisionRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/revision': typeof ApiRevisionRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/revision': typeof RevisionRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/revision': typeof ApiRevisionRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/chat'
+  fullPaths: '/' | '/revision' | '/api/chat' | '/api/revision'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/chat'
-  id: '__root__' | '/' | '/api/chat'
+  to: '/' | '/revision' | '/api/chat' | '/api/revision'
+  id: '__root__' | '/' | '/revision' | '/api/chat' | '/api/revision'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  RevisionRoute: typeof RevisionRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiRevisionRoute: typeof ApiRevisionRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -58,6 +78,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/revision': {
+      id: '/revision'
+      path: '/revision'
+      fullPath: '/revision'
+      preLoaderRoute: typeof RevisionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -65,23 +92,22 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/revision': {
+      id: '/api/revision'
+      path: '/api/revision'
+      fullPath: '/api/revision'
+      preLoaderRoute: typeof ApiRevisionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  RevisionRoute: RevisionRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiRevisionRoute: ApiRevisionRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

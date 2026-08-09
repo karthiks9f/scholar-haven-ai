@@ -1,8 +1,10 @@
 import { useEffect, useRef } from "react";
-import { LogOut, Search, UserRound, Zap } from "lucide-react";
+import { LayoutGrid, LogOut, NotebookPen, Search, UserRound, Zap } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
 
 type TopNavProps = {
   email: string;
@@ -40,7 +42,25 @@ export function TopNav({ email, query, onQueryChange, onSignOut }: TopNavProps) 
           <span className="font-display truncate text-lg font-extrabold tracking-tight sm:text-xl">
             StudentVault <span className="gradient-text">⚡</span>
           </span>
+          <nav className="ml-1 flex items-center gap-1">
+            <Link
+              to="/"
+              activeOptions={{ exact: true }}
+              className="inline-flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-sm sm:px-3 font-semibold text-muted-foreground transition-colors hover:bg-accent hover:text-foreground [&.active]:bg-surface-raised [&.active]:text-foreground"
+            >
+              <LayoutGrid className="h-4 w-4" />
+              <span className="hidden sm:inline">Classes</span>
+            </Link>
+            <Link
+              to="/revision"
+              className="inline-flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-sm sm:px-3 font-semibold text-muted-foreground transition-colors hover:bg-accent hover:text-foreground [&.active]:bg-surface-raised [&.active]:text-foreground"
+            >
+              <NotebookPen className="h-4 w-4" />
+              <span className="hidden sm:inline">Revision</span>
+            </Link>
+          </nav>
         </div>
+
 
         <div className="relative order-3 col-span-2 lg:order-none lg:col-span-1 lg:max-w-lg lg:justify-self-center">
           <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
