@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { GraduationCap, Loader2, Zap } from "lucide-react";
+import { GraduationCap, KeyRound, Loader2, Zap } from "lucide-react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import { redeemAccessKey } from "@/lib/guest-access.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +16,32 @@ export function AuthGate() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [sentConfirmation, setSentConfirmation] = useState(false);
+  const [showKey, setShowKey] = useState(false);
+  const [accessKey, setAccessKey] = useState("");
+  const redeem = useServerFn(redeemAccessKey);
+
+  async function handleAccessKey(event: React.FormEvent) {
+    event.preventDefault();
+    setBusy(true);
+    try {
+      const result = await redeem({ data: { key: accessKey } });
+      if (!result.ok) {
+        toast.error("That access key isn't valid.");
+        return;
+      }
+      const { error } = await supabase.auth.verifyOtp({
+        type: "magiclink",
+        token_hash: result.tokenHash,
+      });
+      if (error) throw error;
+      toast.success("Welcome in — guest access granted.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not use that key");
+    } finally {
+      setBusy(false);
+    }
+  }
+
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -144,6 +172,42 @@ export function AuthGate() {
               <GraduationCap className="h-4 w-4" />
               Continue with Google
             </Button>
+
+            {showKey ? (
+              <form onSubmit={handleAccessKey} className="mt-4 space-y-2">
+                <Label htmlFor="access-key">Access key</Label>
+                <Input
+                  id="access-key"
+                  type="password"
+                  required
+                  autoComplete="off"
+                  placeholder="Paste the key you were given"
+                  value={accessKey}
+                  onChange={(e) => setAccessKey(e.target.value)}
+                  className="h-11 rounded-xl border-border bg-surface-raised"
+                />
+                <Button
+                  type="submit"
+                  disabled={busy}
+                  variant="outline"
+                  className="h-11 w-full rounded-xl border-border-bright bg-surface-raised hover:bg-accent"
+                >
+                  {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <KeyRound className="h-4 w-4" />}
+                  Enter without an account
+                </Button>
+              </form>
+            ) : (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setShowKey(true)}
+                className="mt-3 h-10 w-full rounded-xl text-muted-foreground hover:text-foreground"
+              >
+                <KeyRound className="h-4 w-4" />
+                I have an access key
+              </Button>
+            )}
+
 
             <p className="mt-6 text-center text-sm text-muted-foreground">
               {mode === "signup" ? "Already have a vault?" : "New here?"}{" "}
