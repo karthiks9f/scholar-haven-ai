@@ -173,6 +173,42 @@ export function AuthGate() {
               Continue with Google
             </Button>
 
+            {showKey ? (
+              <form onSubmit={handleAccessKey} className="mt-4 space-y-2">
+                <Label htmlFor="access-key">Access key</Label>
+                <Input
+                  id="access-key"
+                  type="password"
+                  required
+                  autoComplete="off"
+                  placeholder="Paste the key you were given"
+                  value={accessKey}
+                  onChange={(e) => setAccessKey(e.target.value)}
+                  className="h-11 rounded-xl border-border bg-surface-raised"
+                />
+                <Button
+                  type="submit"
+                  disabled={busy}
+                  variant="outline"
+                  className="h-11 w-full rounded-xl border-border-bright bg-surface-raised hover:bg-accent"
+                >
+                  {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <KeyRound className="h-4 w-4" />}
+                  Enter without an account
+                </Button>
+              </form>
+            ) : (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setShowKey(true)}
+                className="mt-3 h-10 w-full rounded-xl text-muted-foreground hover:text-foreground"
+              >
+                <KeyRound className="h-4 w-4" />
+                I have an access key
+              </Button>
+            )}
+
+
             <p className="mt-6 text-center text-sm text-muted-foreground">
               {mode === "signup" ? "Already have a vault?" : "New here?"}{" "}
               <button
