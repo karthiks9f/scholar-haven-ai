@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { GraduationCap, Loader2, Zap } from "lucide-react";
+import { GraduationCap, KeyRound, Loader2, Zap } from "lucide-react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import { redeemAccessKey } from "@/lib/guest-access.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +16,32 @@ export function AuthGate() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [sentConfirmation, setSentConfirmation] = useState(false);
+  const [showKey, setShowKey] = useState(false);
+  const [accessKey, setAccessKey] = useState("");
+  const redeem = useServerFn(redeemAccessKey);
+
+  async function handleAccessKey(event: React.FormEvent) {
+    event.preventDefault();
+    setBusy(true);
+    try {
+      const result = await redeem({ data: { key: accessKey } });
+      if (!result.ok) {
+        toast.error("That access key isn't valid.");
+        return;
+      }
+      const { error } = await supabase.auth.verifyOtp({
+        type: "magiclink",
+        token_hash: result.tokenHash,
+      });
+      if (error) throw error;
+      toast.success("Welcome in — guest access granted.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not use that key");
+    } finally {
+      setBusy(false);
+    }
+  }
+
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
