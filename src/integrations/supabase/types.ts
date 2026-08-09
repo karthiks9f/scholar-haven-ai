@@ -85,6 +85,42 @@ export type Database = {
           },
         ]
       }
+      revision_sheets: {
+        Row: {
+          content: string
+          created_at: string
+          grade: string
+          id: string
+          last_reviewed_at: string | null
+          subject: string
+          topic: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          grade?: string
+          id?: string
+          last_reviewed_at?: string | null
+          subject?: string
+          topic: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          grade?: string
+          id?: string
+          last_reviewed_at?: string | null
+          subject?: string
+          topic?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       student_profiles: {
         Row: {
           created_at: string
