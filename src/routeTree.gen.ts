@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RevisionRouteImport } from './routes/revision'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiRevisionRouteImport } from './routes/api/revision'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RevisionRoute = RevisionRouteImport.update({
+  id: '/revision',
+  path: '/revision',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
@@ -31,30 +37,34 @@ const ApiRevisionRoute = ApiRevisionRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/revision': typeof RevisionRoute
   '/api/chat': typeof ApiChatRoute
   '/api/revision': typeof ApiRevisionRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/revision': typeof RevisionRoute
   '/api/chat': typeof ApiChatRoute
   '/api/revision': typeof ApiRevisionRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/revision': typeof RevisionRoute
   '/api/chat': typeof ApiChatRoute
   '/api/revision': typeof ApiRevisionRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/chat' | '/api/revision'
+  fullPaths: '/' | '/revision' | '/api/chat' | '/api/revision'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/chat' | '/api/revision'
-  id: '__root__' | '/' | '/api/chat' | '/api/revision'
+  to: '/' | '/revision' | '/api/chat' | '/api/revision'
+  id: '__root__' | '/' | '/revision' | '/api/chat' | '/api/revision'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  RevisionRoute: typeof RevisionRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiRevisionRoute: typeof ApiRevisionRoute
 }
@@ -66,6 +76,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/revision': {
+      id: '/revision'
+      path: '/revision'
+      fullPath: '/revision'
+      preLoaderRoute: typeof RevisionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/chat': {
@@ -87,6 +104,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  RevisionRoute: RevisionRoute,
   ApiChatRoute: ApiChatRoute,
   ApiRevisionRoute: ApiRevisionRoute,
 }

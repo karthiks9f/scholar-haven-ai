@@ -1,8 +1,10 @@
 import { useEffect, useRef } from "react";
-import { LogOut, Search, UserRound, Zap } from "lucide-react";
+import { LayoutGrid, LogOut, NotebookPen, Search, UserRound, Zap } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
 
 type TopNavProps = {
   email: string;
