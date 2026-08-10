@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RevisionRouteImport } from './routes/revision'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiRevisionRouteImport } from './routes/api/revision'
 
@@ -22,6 +23,11 @@ const IndexRoute = IndexRouteImport.update({
 const RevisionRoute = RevisionRouteImport.update({
   id: '/revision',
   path: '/revision',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
@@ -38,12 +44,14 @@ const ApiRevisionRoute = ApiRevisionRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/revision': typeof RevisionRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/chat': typeof ApiChatRoute
   '/api/revision': typeof ApiRevisionRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/revision': typeof RevisionRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/chat': typeof ApiChatRoute
   '/api/revision': typeof ApiRevisionRoute
 }
@@ -51,20 +59,28 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/revision': typeof RevisionRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/chat': typeof ApiChatRoute
   '/api/revision': typeof ApiRevisionRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/revision' | '/api/chat' | '/api/revision'
+  fullPaths: '/' | '/revision' | '/sitemap.xml' | '/api/chat' | '/api/revision'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/revision' | '/api/chat' | '/api/revision'
-  id: '__root__' | '/' | '/revision' | '/api/chat' | '/api/revision'
+  to: '/' | '/revision' | '/sitemap.xml' | '/api/chat' | '/api/revision'
+  id:
+    | '__root__'
+    | '/'
+    | '/revision'
+    | '/sitemap.xml'
+    | '/api/chat'
+    | '/api/revision'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RevisionRoute: typeof RevisionRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiRevisionRoute: typeof ApiRevisionRoute
 }
@@ -83,6 +99,13 @@ declare module '@tanstack/react-router' {
       path: '/revision'
       fullPath: '/revision'
       preLoaderRoute: typeof RevisionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/chat': {
@@ -105,6 +128,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RevisionRoute: RevisionRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiChatRoute: ApiChatRoute,
   ApiRevisionRoute: ApiRevisionRoute,
 }
