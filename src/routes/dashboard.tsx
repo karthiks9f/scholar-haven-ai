@@ -16,7 +16,7 @@ import { LanguageSelect } from "@/components/vault/LanguageSelect";
 import { Button } from "@/components/ui/button";
 import type { ClassRecord } from "@/lib/vault";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/dashboard")({
   ssr: false,
   head: () => ({
     meta: [
