@@ -20,20 +20,13 @@ export const Route = createFileRoute("/dashboard")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "StudentVault — In-App Lessons & Study Dashboard" },
+      { title: "My Dashboard — StudentVault" },
       {
         name: "description",
         content:
-          "StudentVault teaches high school subjects with in-app lessons, guided practice, a class schedule, focus timer and AI tutor.",
+          "Your private StudentVault dashboard: six class periods, in-app lessons, focus timer and AI Study Buddy.",
       },
-      { property: "og:title", content: "StudentVault — Your in-app learning dashboard" },
-      {
-        property: "og:description",
-        content:
-          "Learn all six subjects through guided explanations and practice without leaving StudentVault.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
+      { name: "robots", content: "noindex, nofollow" },
     ],
   }),
   component: Dashboard,
