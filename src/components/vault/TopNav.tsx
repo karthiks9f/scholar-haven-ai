@@ -44,7 +44,7 @@ export function TopNav({ email, query, onQueryChange, onSignOut }: TopNavProps) 
           </span>
           <nav className="ml-1 flex items-center gap-1">
             <Link
-              to="/"
+              to="/dashboard"
               activeOptions={{ exact: true }}
               className="inline-flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-sm sm:px-3 font-semibold text-muted-foreground transition-colors hover:bg-accent hover:text-foreground [&.active]:bg-surface-raised [&.active]:text-foreground"
             >
